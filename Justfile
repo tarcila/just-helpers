@@ -1,4 +1,4 @@
-mod code './code.just'
+mod dotfiles './dotfiles.just'
 
 [doc("This is the first recipe")]
 [metadata("task", "code", "default")]
@@ -20,8 +20,8 @@ task3:
 
 [doc("Generates visual studio tasks file")]
 [metadata("task", "code")]
-generate_vscode_tasks_json: (code::generate_vscode_tasks_json ".vscode")
+generate_vscode_tasks_json: (dotfiles::generate_vscode_tasks_json ".vscode")
 
 [doc("Generates visual studio launch file")]
 [metadata("task", "code")]
-generate_vscode_launch_json: (code::generate_vscode_launch_json ".vscode")
+generate_vscode_launch_json: (dotfiles::generate_vscode_launch_json ".vscode")

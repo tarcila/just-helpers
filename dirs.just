@@ -38,11 +38,19 @@ _jj_dir_7 := if path_exists(join(_jj_dir_6, ".jj")) == "true" { _jj_dir_6 } else
 _jj_dir_8 := if path_exists(join(_jj_dir_7, ".jj")) == "true" { _jj_dir_7 } else { if _jj_dir_7 =~ _root_regex { _jj_dir_7 } else { parent_directory(_jj_dir_7) } }
 _jj_dir_9 := if path_exists(join(_jj_dir_8, ".jj")) == "true" { _jj_dir_8 } else { if _jj_dir_8 =~ _root_regex { _jj_dir_8 } else { parent_directory(_jj_dir_8) } }
 
-_ROOT_DIR := if path_exists(join(_jj_dir_9, ".jj")) == "true" {
-    _jj_dir_9
+# Get the longest path of both, check if _git_dir_9 is a prefix of _jj_dir_9
+# if _git_dir is not a prefix of _jj_dir, it is longer
+_jjgit_dir := if trim_start_match(_jj_dir_9, _git_dir_9) == _jj_dir_9 {
+    _git_dir_9
 } else {
-    if path_exists(join(_git_dir_9, ".git")) == "true" {
-        _git_dir_9
+    _jj_dir_9   
+}
+
+_ROOT_DIR := if path_exists(join(_jjgit_dir, ".jj")) == "true" {
+    _jjgit_dir
+} else {
+    if path_exists(join(_jjgit_dir, ".git")) == "true" {
+        _jjgit_dir
     } else {
         error("Could not find root dir. Looked up 9 levels above.")
     }
