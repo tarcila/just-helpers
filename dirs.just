@@ -1,6 +1,10 @@
 # Try and get the closest jujutsu or git folder.
 # Equivalent to `git rev-parse --show-toplevel` but we don't want to spawn a new process.
 
+# Safety check. Our directory layout expects Invocation and Justfile directories to be different
+# so root files are not erased by just commands.
+_invocation_directory_is_not_justfile_dir := if invocation_directory() != justfile_directory() { "OK:invocation_directory_is_not_justfile_directory" } else { error("Justfile must NOT be invoked from the root directory of the repository") }
+
 _root_regex := '^(/|[a-zA-Z]:[/\\])$'
 
 _test_ok_1 := if "/" =~ _root_regex { "" } else { error("Does not match") }
