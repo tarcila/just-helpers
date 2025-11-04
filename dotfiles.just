@@ -23,20 +23,56 @@ generate_dot_envrc source_dir install_dir *additional_envrc_content:
 [no-cd]
 generate_dot_clangd clangd_dir compile_commands_dir:
     #!/usr/bin/env -S bash -eu -o pipefail
+
     DOT_CLANGD="{{ clangd_dir / ".clangd" }}"
     DOT_CLANGD_TMP="{{ clangd_dir / ".clangd.tmp" }}"
     echo -e "CompileFlags:\n  CompilationDatabase: {{ compile_commands_dir }}" > "${DOT_CLANGD_TMP}"
     echo -e '  Add:' >> "${DOT_CLANGD_TMP}"
-    echo -e '    - -std=c++17' >> "${DOT_CLANGD_TMP}"
+    (
+        GCC_OUTPUT=$(g++ -v -E -x c++ - < /dev/null 2>&1)
 
-    for flag in ${NIX_CFLAGS_COMPILE}; do
-        echo "    - ${flag}" >> "${DOT_CLANGD_TMP}"
-    done
-    IFS=":"
-    for inc in ${CMAKE_INCLUDE_PATH}; do
-        echo "    - -I" >> "${DOT_CLANGD_TMP}"
-        echo "    - ${inc}" >> "${DOT_CLANGD_TMP}"
-    done
+        # Extract quote include paths (paths after '#include "..." search starts here:')
+        QUOTE_SECTION=false
+        while IFS= read -r line; do
+            if [[ "$line" == '#include "..." search starts here:' ]]; then
+                QUOTE_SECTION=true
+                continue
+            fi
+            
+            if [[ "$QUOTE_SECTION" == true ]]; then
+                # Check if line starts with a space (indented path)
+                if [[ "$line" =~ ^\ .+ ]]; then
+                    # Remove leading space and print
+                    echo "    - -I"
+                    echo "    - ${line# }"
+                else
+                    # Non-indented line means end of section
+                    QUOTE_SECTION=false
+                fi
+            fi
+        done <<< "$GCC_OUTPUT"
+
+        # Extract bracket include paths (paths after '#include <...> search starts here:')
+        BRACKET_SECTION=false
+        while IFS= read -r line; do
+            if [[ "$line" == '#include <...> search starts here:' ]]; then
+                BRACKET_SECTION=true
+                continue
+            fi
+            
+            if [[ "$BRACKET_SECTION" == true ]]; then
+                # Check if line starts with a space (indented path)
+                if [[ "$line" =~ ^\ .+ ]]; then
+                    # Remove leading space and print
+                    echo "    - -isystem"
+                    echo "    - ${line# }"
+                else
+                    # Non-indented line means end of section
+                    break
+                fi
+            fi
+        done <<< "$GCC_OUTPUT"
+    ) >> ${DOT_CLANGD_TMP}
     cmp -s "${DOT_CLANGD}" "${DOT_CLANGD_TMP}" && rm -f "${DOT_CLANGD_TMP}" || mv -f "${DOT_CLANGD_TMP}" "${DOT_CLANGD}"
 
 [doc("Generate .vscode/tasks.json")]
