@@ -1,8 +1,8 @@
 [doc("Generate .envrc config file")]
 [group("Justfile DotFiles")]
 [no-cd]
-generate_dot_envrc source_dir install_dir *additional_envrc_content:
-    #!/usr/bin/env -S bash -eu -o pipefail
+[script("bash", "-euo", "pipefail")]
+generate_envrc source_dir install_dir *additional_envrc_content:
     DOT_ENVRC="{{ source_dir / ".envrc" }}"
     DOT_ENVRC_TMP="{{ source_dir / ".envrc.tmp" }}"
     cat <<EOT > "${DOT_ENVRC_TMP}"
@@ -21,15 +21,14 @@ generate_dot_envrc source_dir install_dir *additional_envrc_content:
 [doc("Generate .clangd config file")]
 [group("Justfile DotFiles")]
 [no-cd]
-generate_dot_clangd clangd_dir compile_commands_dir:
-    #!/usr/bin/env -S bash -eu -o pipefail
-
+[script("bash", "-euo", "pipefail")]
+generate_clangd clangd_dir compile_commands_dir:
     DOT_CLANGD="{{ clangd_dir / ".clangd" }}"
     DOT_CLANGD_TMP="{{ clangd_dir / ".clangd.tmp" }}"
     echo -e "CompileFlags:\n  CompilationDatabase: {{ compile_commands_dir }}" > "${DOT_CLANGD_TMP}"
     echo -e '  Add:' >> "${DOT_CLANGD_TMP}"
     (
-        GCC_OUTPUT=$(g++ -v -E -x c++ - < /dev/null 2>&1)
+        GCC_OUTPUT=$(clang++ -v -E -x c++ - < /dev/null 2>&1)
 
         # Extract quote include paths (paths after '#include "..." search starts here:')
         QUOTE_SECTION=false
@@ -78,8 +77,8 @@ generate_dot_clangd clangd_dir compile_commands_dir:
 [doc("Generate .vscode/tasks.json")]
 [group("Justfile DotFiles")]
 [no-cd]
+[script("bash", "-euo", "pipefail")]
 generate_vscode_tasks_json vscode_dir:
-    #!/usr/bin/env -S bash -eu -o pipefail
     mkdir -p "{{ vscode_dir }}"
     just --dump-format json --dump | \
         jq --arg just "{{ just_executable() }}" --slurpfile debuggers "{{ source_directory() }}/filters/_config_{{ os() }}.jq" -M -f "{{ source_directory() }}/filters/code.tasks.jq" > "{{ vscode_dir }}/tasks.json"
@@ -87,8 +86,8 @@ generate_vscode_tasks_json vscode_dir:
 [doc("Generate .vscode/launch.json")]
 [group("Justfile DotFiles")]
 [no-cd]
+[script("bash", "-euo", "pipefail")]
 generate_vscode_launch_json vscode_dir:
-    #!/usr/bin/env -S bash -eu -o pipefail
     mkdir -p "{{ vscode_dir }}"
     just --dump-format json --dump | \
         jq --arg just "{{ just_executable() }}" --slurpfile config "{{ source_directory() }}/filters/_config_{{ os() }}.jq" -M -f "{{ source_directory() }}/filters/code.launch.jq" > "{{ vscode_dir }}/launch.json"
@@ -96,8 +95,8 @@ generate_vscode_launch_json vscode_dir:
 [doc("Generate .emacs.desktop file")]
 [group("Justfile DotFiles")]
 [no-cd]
+[script("bash", "-euo", "pipefail")]
 generate_emacs_desktop emacs_desktop_dir:
-    #!/usr/bin/env -S bash -eu -o pipefail
     mkdir -p "{{ emacs_desktop_dir }}"
     DOT_EMACS_DESKTOP="{{ emacs_desktop_dir / ".emacs.desktop" }}"
     DOT_EMACS_DESKTOP_TMP="{{ emacs_desktop_dir / ".emacs.desktop.tmp" }}"

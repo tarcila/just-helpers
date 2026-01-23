@@ -59,3 +59,6 @@ _ROOT_DIR := if path_exists(join(_jjgit_dir, ".jj")) == "true" {
         error("Could not find root dir. Looked up 9 levels above.")
     }
 }
+
+root_dir:
+    echo "{{ ROOT_DIR }}"

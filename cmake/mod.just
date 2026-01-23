@@ -8,9 +8,9 @@
 [doc("CMake configure, optionally forcing reconfigure if already done")]
 [group("Justfile CMake")]
 [no-cd]
-_cmake_configure force source_dir build_dir install_dir *cmake_options:
-    #!/usr/bin/env -S bash -eu -o pipefail
-    if test "{{ force }}" -eq "1" -o \! -e "{{ install_dir }}/_cmake/CMakeCache.txt"
+[script("bash", "-euo", "pipefail")]
+_configure force source_dir build_dir install_dir *cmake_options:
+    if [ "{{ force }}" = "1" ] || [ "{{ path_exists(install_dir / '_cmake/CMakeCache.txt') }}" != "true" ]
     then
         cmake -Wno-dev -G "Ninja Multi-Config" \
             -DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF \
@@ -30,20 +30,20 @@ _cmake_configure force source_dir build_dir install_dir *cmake_options:
 [doc("CMake configure")]
 [group("Justfile CMake")]
 [no-cd]
-cmake_configure cfg source_dir build_dir install_dir *cmake_options: (_cmake_configure "0" cfg source_dir build_dir install_dir cmake_options)
+configure cfg source_dir build_dir install_dir *cmake_options: (_configure "0" cfg source_dir build_dir install_dir cmake_options)
 
 [doc("CMake reconfigure")]
 [group("Justfile CMake")]
 [no-cd]
-cmake_force_configure cfg source_dir build_dir install_dir *cmake_options: (_cmake_configure "1" cfg source_dir build_dir install_dir cmake_options)
+force_configure cfg source_dir build_dir install_dir *cmake_options: (_configure "1" cfg source_dir build_dir install_dir cmake_options)
 
 [doc("CMake build")]
 [group("Justfile CMake")]
 [no-cd]
-cmake_build cfg build_dir target="all":
+build cfg build_dir target="all":
     cmake --build "{{ build_dir }}" --config "{{ cfg }}" --target "{{ target }}"
 
 [doc("CMake install")]
 [group("Justfile CMake")]
 [no-cd]
-cmake_install cfg build_dir: (cmake_build cfg build_dir "install")
+install cfg build_dir: (build cfg build_dir "install")
