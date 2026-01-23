@@ -40,7 +40,7 @@ cmake_force_configure cfg source_dir build_dir install_dir *cmake_options: (_cma
 [doc("CMake build")]
 [group("Justfile CMake")]
 [no-cd]
-cmake_build cfg build_dir target="install":
+cmake_build cfg build_dir target="all":
     cmake --build "{{ build_dir }}" --config "{{ cfg }}" --target "{{ target }}"
 
 [doc("CMake install")]
