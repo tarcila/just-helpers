@@ -16,6 +16,7 @@ _build_dir := _root_dir / "_out/_cmake"
 _install_dir := _root_dir / "_out"
 _clangd_dir := _root_dir
 _compile_commands_dir := _build_dir
+_compiler := if os() == "macos" { "clang++" } else { "g++" }
 _vscode_dir := _root_dir / ".vscode"
 _emacs_desktop_dir := _root_dir / ".emacs.d"
 _dape_dir := _root_dir
@@ -43,7 +44,7 @@ clean:
 # Auxiliary recipes
 
 [doc("Generate .clangd config file")]
-generate_clangd: (dotfiles::generate_clangd _clangd_dir _compile_commands_dir)
+generate_clangd compiler=_compiler: (dotfiles::generate_clangd _clangd_dir _compile_commands_dir compiler)
 
 [doc("Generate .vscode/tasks.json")]
 generate_vscode_tasks_json: (dotfiles::generate_vscode_tasks_json _vscode_dir)
@@ -55,7 +56,7 @@ generate_vscode_launch_json: (dotfiles::generate_vscode_launch_json _vscode_dir)
 generate_emacs_desktop: (dotfiles::generate_emacs_desktop _emacs_desktop_dir)
 
 [doc("Generate .dape.el with defaults")]
-dape: (dotfiles::generate_dape "{{ dape_dir }}")
+generate_emacs_dape: (dotfiles::generate_emacs_dape "{{ dape_dir }}")
 
 # Repo wrappers
 

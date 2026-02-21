@@ -22,13 +22,17 @@ generate_envrc source_dir install_dir *additional_envrc_content:
 [group("Justfile DotFiles")]
 [no-cd]
 [script("bash", "-euo", "pipefail")]
-generate_clangd clangd_dir compile_commands_dir:
+generate_clangd clangd_dir compile_commands_dir compiler:
+    if ! command -v {{ compiler }} &>/dev/null; then
+        echo "Error: compiler '{{ compiler }}' not found in PATH" >&2
+        exit 1
+    fi
     DOT_CLANGD="{{ clangd_dir / ".clangd" }}"
     DOT_CLANGD_TMP="{{ clangd_dir / ".clangd.tmp" }}"
     echo -e "CompileFlags:\n  CompilationDatabase: {{ compile_commands_dir }}" > "${DOT_CLANGD_TMP}"
     echo -e '  Add:' >> "${DOT_CLANGD_TMP}"
     (
-        GCC_OUTPUT=$(clang++ -v -E -x c++ - < /dev/null 2>&1)
+        COMPILER_OUTPUT=$({{ compiler }} -v -E -x c++ - < /dev/null 2>&1)
 
         # Extract quote include paths (paths after '#include "..." search starts here:')
         QUOTE_SECTION=false
@@ -37,19 +41,16 @@ generate_clangd clangd_dir compile_commands_dir:
                 QUOTE_SECTION=true
                 continue
             fi
-            
+
             if [[ "$QUOTE_SECTION" == true ]]; then
-                # Check if line starts with a space (indented path)
                 if [[ "$line" =~ ^\ .+ ]]; then
-                    # Remove leading space and print
                     echo "    - -I"
                     echo "    - ${line# }"
                 else
-                    # Non-indented line means end of section
                     QUOTE_SECTION=false
                 fi
             fi
-        done <<< "$GCC_OUTPUT"
+        done <<< "$COMPILER_OUTPUT"
 
         # Extract bracket include paths (paths after '#include <...> search starts here:')
         BRACKET_SECTION=false
@@ -58,19 +59,16 @@ generate_clangd clangd_dir compile_commands_dir:
                 BRACKET_SECTION=true
                 continue
             fi
-            
+
             if [[ "$BRACKET_SECTION" == true ]]; then
-                # Check if line starts with a space (indented path)
                 if [[ "$line" =~ ^\ .+ ]]; then
-                    # Remove leading space and print
                     echo "    - -isystem"
                     echo "    - ${line# }"
                 else
-                    # Non-indented line means end of section
                     break
                 fi
             fi
-        done <<< "$GCC_OUTPUT"
+        done <<< "$COMPILER_OUTPUT"
     ) >> ${DOT_CLANGD_TMP}
     cmp -s "${DOT_CLANGD}" "${DOT_CLANGD_TMP}" && rm -f "${DOT_CLANGD_TMP}" || mv -f "${DOT_CLANGD_TMP}" "${DOT_CLANGD}"
 
@@ -114,7 +112,7 @@ generate_dir_locals dir_locals_dir compile_commands_dir build_dir install_dir:
 [group("Justfile DotFiles")]
 [no-cd]
 [script("bash", "-euo", "pipefail")]
-generate_dape dape_dir:
+generate_emacs_dape dape_dir:
     DOT_DAPE="{{ dape_dir / ".dape.el" }}"
     DOT_DAPE_TMP="{{ dape_dir / ".dape.el.tmp" }}"
     just --dump-format json --dump | \
