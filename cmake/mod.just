@@ -30,12 +30,12 @@ _configure force source_dir build_dir install_dir *cmake_options:
 [doc("CMake configure")]
 [group("Justfile CMake")]
 [no-cd]
-configure cfg source_dir build_dir install_dir *cmake_options: (_configure "0" cfg source_dir build_dir install_dir cmake_options)
+configure source_dir build_dir install_dir *cmake_options: (_configure "0" source_dir build_dir install_dir cmake_options)
 
 [doc("CMake reconfigure")]
 [group("Justfile CMake")]
 [no-cd]
-force_configure cfg source_dir build_dir install_dir *cmake_options: (_configure "1" cfg source_dir build_dir install_dir cmake_options)
+force_configure source_dir build_dir install_dir *cmake_options: (_configure "1" source_dir build_dir install_dir cmake_options)
 
 [doc("CMake build")]
 [group("Justfile CMake")]
