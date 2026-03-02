@@ -14,6 +14,7 @@ _source_dir := _ROOT_DIR
 _root_dir := _ROOT_DIR
 _build_dir := _root_dir / "_out/_cmake"
 _install_dir := _root_dir / "_out"
+_envrc_dir := _root_dir
 _clangd_dir := _root_dir
 _compile_commands_dir := _build_dir
 _compiler := if os() == "macos" { "clang++" } else { "g++" }
@@ -42,6 +43,9 @@ clean:
     rm -fr "{{ _install_dir }}"
 
 # Auxiliary recipes
+
+[doc("Generate .envrc file")]
+generate_envrc: (dotfiles::generate_envrc _envrc_dir _install_dir)
 
 [doc("Generate .clangd config file")]
 generate_clangd compiler=_compiler: (dotfiles::generate_clangd _clangd_dir _compile_commands_dir compiler)

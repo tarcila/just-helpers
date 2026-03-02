@@ -2,9 +2,9 @@
 [group("Justfile DotFiles")]
 [no-cd]
 [script("bash", "-euo", "pipefail")]
-generate_envrc source_dir install_dir *additional_envrc_content:
-    DOT_ENVRC="{{ source_dir / ".envrc" }}"
-    DOT_ENVRC_TMP="{{ source_dir / ".envrc.tmp" }}"
+generate_envrc _envrc_dir install_dir *additional_envrc_content:
+    DOT_ENVRC="{{ _envrc_dir / ".envrc" }}"
+    DOT_ENVRC_TMP="{{ _envrc_dir / ".envrc.tmp" }}"
     cat <<EOT > "${DOT_ENVRC_TMP}"
     source_up
 
