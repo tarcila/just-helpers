@@ -12,7 +12,7 @@
 _configure force source_dir build_dir install_dir *cmake_options:
     if [ "{{ force }}" = "1" ] || [ "{{ path_exists(install_dir / '_cmake/CMakeCache.txt') }}" != "true" ]
     then
-        cmake -Wno-dev -G "Ninja Multi-Config" \
+        cmake -Wno-author -G "Ninja Multi-Config" \
             -DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
